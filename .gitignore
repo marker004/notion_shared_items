@@ -1,0 +1,6 @@
+*.pyc
+*.py[cod]
+.DS_STORE
+__pycache__/
+dist/
+.coverage
