@@ -29,16 +29,17 @@ def strip_all_punctuation(subject: str) -> str:
     return subject.translate(str.maketrans("", "", punctuation))
 
 
-# todo: make this take an arg that describes what is happening in the block ie "fetching results..."
-# https://realpython.com/primer-on-python-decorators/#both-please-but-never-mind-the-bread
-def measure_execution(
-    func,
-):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = time.time()
-        res = func(*args, **kwargs)
-        print(f"Took {time.time() - start_time} seconds")
-        return res
+def measure_execution(description: Optional[str] = None):
+    def wrap(func):
+        @functools.wraps(func)
+        def wrapped_f(*args, **kwargs):
+            start_time = time.time()
+            if description:
+                print(description)
+            res = func(*args, **kwargs)
+            print(f"Took {time.time() - start_time} seconds")
+            return res
 
-    return wrapper
+        return wrapped_f
+
+    return wrap
