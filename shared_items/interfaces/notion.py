@@ -1,6 +1,6 @@
 import os
 
-from typing import Any, Literal, TypedDict
+from typing import Any, Callable, Literal, Optional, TypedDict
 from operator import itemgetter
 
 from notion_client import Client as NotionClient
@@ -67,3 +67,16 @@ class Notion:
     # the dict returned contains a list of Notion Pages, too complicated to type for now, given lack of need
     def query_database(self, database_id: str) -> dict:
         return self.client.databases.query(database_id=database_id)
+
+    def recursive_fetch_and_delete(self, fetcher: Callable[[Optional[str]], dict]):
+        def func(next_cursor: Optional[str] = None):
+            database_response = fetcher(next_cursor)
+            database_rows = database_response["results"]
+
+            for row in database_rows:
+                self.client.blocks.delete(block_id=row["id"])
+
+            if database_response["has_more"]:
+                func(database_response["next_cursor"])
+
+        return func
