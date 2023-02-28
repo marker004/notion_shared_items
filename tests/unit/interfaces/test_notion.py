@@ -7,7 +7,9 @@ def test_assemble_prop_handles_rich_text():
     dummy_prop: NotionProp = {
         "name": "SomeName",
         "type": "rich_text",
-        "content": "yadayada",
+        "content": {
+            "content": "yadayada",
+        },
     }
 
     dummy_output = notion.assemble_prop(dummy_prop)
@@ -22,7 +24,9 @@ def test_assemble_props_handles_rich_text():
     dummy_prop: NotionProp = {
         "name": "SomeName",
         "type": "rich_text",
-        "content": "yadayada",
+        "content": {
+            "content": "yadayada",
+        },
     }
 
     dummy_output = notion.assemble_props([dummy_prop])

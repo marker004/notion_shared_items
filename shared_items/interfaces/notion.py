@@ -1,6 +1,7 @@
 import os
 
-from typing import Any, Callable, Literal, Optional, TypedDict
+from typing import Any, Callable, Literal, Optional, TypedDict, Union, cast
+from typing_extensions import NotRequired
 from operator import itemgetter
 
 from notion_client import Client as NotionClient
@@ -11,15 +12,25 @@ MOVIES_PAGE_ID = "491cd007d6cf466a80be98a6576e01f2"
 MOVIES_DATABASE_ID = "e341bcbed2f14bdeaa7377415865d2fa"
 
 
+class TextPropContent(TypedDict):
+    content: str
+
+
+class DatePropContent(TypedDict):
+    start: str
+    end: NotRequired[str]
+    time_zone: NotRequired[str]
+
+
 class Prop(TypedDict):
     name: str
     type: str
-    content: str  # should handle all sorts of content, just text for now
+    content: Union[TextPropContent, DatePropContent]
 
 
 ARRAY_CONTENT_TYPES = ["rich_text", "title"]
 
-COMPATIBLE_TYPES = Literal["rich_text"]
+COMPATIBLE_TYPES = Literal["rich_text", "title", "date", "number", "url"]
 
 TYPE_MAP = {"rich_text": "text", "title": "text"}
 
@@ -30,21 +41,27 @@ class Notion:
         self.client = NotionClient(auth=self.__token)
 
     def assemble_prop(self, prop: Prop) -> dict:
-        type, content = itemgetter("type", "content")(prop)
+        type = prop["type"]
+        content = prop["content"]
 
         content_structure: Any
 
         # todo: split these into different methods
-        if type in ARRAY_CONTENT_TYPES:
-            content_structure = [{TYPE_MAP[type]: {"content": content}}]
-        elif type == "date":
+        if type == "date":
+            content = cast(DatePropContent, content)
             content_structure = {
-                "start": content,
+                "start": content["start"],
+                "time_zone": content["time_zone"],
             }
-        elif type == "number":
-            content_structure = content
-        elif type == "url":
-            content_structure = content
+        else:
+            content = cast(TextPropContent, content)
+
+            if type in ARRAY_CONTENT_TYPES:
+                content_structure = [{TYPE_MAP[type]: {"content": content["content"]}}]
+            elif type == "number":
+                content_structure = content["content"]
+            elif type == "url":
+                content_structure = content["content"]
 
         return {type: content_structure}
 
