@@ -97,3 +97,11 @@ class Notion:
                 func(database_response["next_cursor"])
 
         return func
+
+    def create_row_for_database(self, database_id: str):
+        def create_row(props: dict):
+            self.client.pages.create(
+                parent={"database_id": database_id}, properties=props
+            )
+
+        return create_row
