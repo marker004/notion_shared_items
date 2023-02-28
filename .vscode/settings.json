@@ -1,0 +1,6 @@
+{
+    "python.defaultInterpreterPath": "/Users/mark/Library/Caches/pypoetry/virtualenvs/shared-items-4o6u88sy-py3.9",
+    "python.formatting.provider": "black",
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4
+}
