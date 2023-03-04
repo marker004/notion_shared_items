@@ -13,7 +13,7 @@ MOVIES_DATABASE_ID = "e341bcbed2f14bdeaa7377415865d2fa"
 
 
 class TextPropContent(TypedDict):
-    content: str
+    content: Union[str, int]
 
 
 class DatePropContent(TypedDict):
@@ -76,10 +76,8 @@ class Notion:
 
     # note: this only handles text type content for now
     # the dict returned is a Notion Page, too complicated to type for now, given lack of need
-    def update_page_props(self, page_id: str, props: list[Prop]) -> dict:
-        properties = self.assemble_props(props)
-
-        return self.client.pages.update(page_id=page_id, properties=properties)
+    def update_page_props(self, page_id: str, props: dict) -> dict:
+        return self.client.pages.update(page_id=page_id, properties=props)
 
     # the dict returned contains a list of Notion Pages, too complicated to type for now, given lack of need
     def query_database(self, database_id: str) -> dict:
