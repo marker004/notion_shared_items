@@ -46,7 +46,6 @@ class Notion:
 
         content_structure: Any
 
-        # todo: split these into different methods
         if type == "date":
             content = cast(DatePropContent, content)
             content_structure = {
