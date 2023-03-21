@@ -37,7 +37,7 @@ def measure_execution(description: Optional[str] = None):
             if description:
                 print(description)
             res = func(*args, **kwargs)
-            print(f"Took {time.time() - start_time} seconds")
+            print(f"Took {time.time() - start_time} seconds\n")
             return res
 
         return wrapped_f

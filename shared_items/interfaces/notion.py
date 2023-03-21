@@ -19,7 +19,7 @@ class TextPropContent(TypedDict):
 class DatePropContent(TypedDict):
     start: str
     end: NotRequired[str]
-    time_zone: NotRequired[str]
+    time_zone: NotRequired[str] # note: not required if only date
 
 
 class Prop(TypedDict):
@@ -51,8 +51,9 @@ class Notion:
             content = cast(DatePropContent, content)
             content_structure = {
                 "start": content["start"],
-                "time_zone": content["time_zone"],
             }
+            if content.get("time_zone"):
+                content_structure["time_zone"] = content["time_zone"]
         else:
             content = cast(TextPropContent, content)
 
@@ -93,6 +94,21 @@ class Notion:
 
             if database_response["has_more"]:
                 func(database_response["next_cursor"])
+
+        return func
+
+    def recursive_fetch(self, fetcher: Callable[[Optional[str]], dict]):
+        rows: list[dict] = []
+
+        def func(next_cursor: Optional[str] = None, rows=rows):
+            database_response = fetcher(next_cursor)
+            database_rows = database_response["results"]
+            rows += database_rows
+
+            if database_response["has_more"]:
+                func(database_response["next_cursor"], rows)
+            else:
+                return rows
 
         return func
 
