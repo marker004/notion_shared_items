@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shared-items"
-version = "0.0.5"
+version = "0.0.6"
 description = "A module for utilizing commonly used functionality in Notion project"
 authors = ["Mark Reckard <mark.reckard@gmail.com>"]
 
@@ -13,3 +13,6 @@ typing-extensions = "^4.5.0"
 black = "^23.1.0"
 mypy = "^1.0.0"
 
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
