@@ -48,22 +48,33 @@ class Notion:
 
         if type == "date":
             content = cast(DatePropContent, content)
-            content_structure = {
-                "start": content["start"],
-            }
-            if content.get("time_zone"):
-                content_structure["time_zone"] = content["time_zone"]
+            content_structure = self.__date_prop(content)
         else:
             content = cast(TextPropContent, content)
-
-            if type in ARRAY_CONTENT_TYPES:
-                content_structure = [{TYPE_MAP[type]: {"content": content["content"]}}]
-            elif type == "number":
-                content_structure = content["content"]
-            elif type == "url":
-                content_structure = content["content"]
+            content_structure = self.__text_prop(content, type)
 
         return {type: content_structure}
+
+
+    def __date_prop(self, content: DatePropContent) -> dict:
+        content_structure = {
+            "start": content["start"],
+        }
+        if content.get("time_zone"):
+            content_structure["time_zone"] = content["time_zone"]
+        return content_structure
+
+    def __text_prop(self, content: TextPropContent, type: str) -> Union[list, Union[str, int]]:
+        content_structure: Union[list, Union[str, int]]
+        if type in ARRAY_CONTENT_TYPES:
+            content_structure = [{TYPE_MAP[type]: {"content": content["content"]}}]
+        elif type == "number":
+            content_structure = content["content"]
+        elif type == "url":
+            content_structure = content["content"]
+        return content_structure
+
+
 
     def assemble_props(self, props: list[Prop]) -> dict:
         update_props = {}
