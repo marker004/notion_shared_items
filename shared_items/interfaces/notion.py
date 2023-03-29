@@ -3,6 +3,7 @@ import os
 from typing import Any, Callable, Literal, Optional, TypedDict, Union, cast
 from typing_extensions import NotRequired
 from operator import itemgetter
+from urllib import parse
 
 from notion_client import Client as NotionClient
 
@@ -19,13 +20,17 @@ class TextPropContent(TypedDict):
 class DatePropContent(TypedDict):
     start: str
     end: NotRequired[str]
-    time_zone: NotRequired[str] # note: not required if only date
+    time_zone: NotRequired[str]  # note: not required if only date
+
+
+class ExternalFilePropContent(TypedDict):
+    url: str
 
 
 class Prop(TypedDict):
     name: str
     type: str
-    content: Union[TextPropContent, DatePropContent]
+    content: Union[TextPropContent, DatePropContent, ExternalFilePropContent]
 
 
 ARRAY_CONTENT_TYPES = ["rich_text", "title"]
@@ -49,12 +54,14 @@ class Notion:
         if type == "date":
             content = cast(DatePropContent, content)
             content_structure = self.__date_prop(content)
-        else:
+        elif type == "files":
+            content = cast(ExternalFilePropContent, content)
+            content_structure = self.__external_file_prop(content)
+        elif type in ["rich_text", "title", "number", "url"]:
             content = cast(TextPropContent, content)
             content_structure = self.__text_prop(content, type)
 
         return {type: content_structure}
-
 
     def __date_prop(self, content: DatePropContent) -> dict:
         content_structure = {
@@ -64,7 +71,9 @@ class Notion:
             content_structure["time_zone"] = content["time_zone"]
         return content_structure
 
-    def __text_prop(self, content: TextPropContent, type: str) -> Union[list, Union[str, int]]:
+    def __text_prop(
+        self, content: TextPropContent, type: str
+    ) -> Union[list, Union[str, int]]:
         content_structure: Union[list, Union[str, int]]
         if type in ARRAY_CONTENT_TYPES:
             content_structure = [{TYPE_MAP[type]: {"content": content["content"]}}]
@@ -74,7 +83,16 @@ class Notion:
             content_structure = content["content"]
         return content_structure
 
-
+    def __external_file_prop(self, content: ExternalFilePropContent):
+        path = parse.urlparse(content['url']).path
+        name = path.split('/')[-1].replace('-0-250-0-375-crop.jpg', '')
+        return [
+            {
+                "type": "external",
+                "external": {"url": content["url"]},
+                "name": name,
+            }
+        ]
 
     def assemble_props(self, props: list[Prop]) -> dict:
         update_props = {}
