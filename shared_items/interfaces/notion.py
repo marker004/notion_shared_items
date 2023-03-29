@@ -84,8 +84,8 @@ class Notion:
         return content_structure
 
     def __external_file_prop(self, content: ExternalFilePropContent):
-        path = parse.urlparse(content['url']).path
-        name = path.split('/')[-1].replace('-0-250-0-375-crop.jpg', '')
+        path = parse.urlparse(content["url"]).path
+        name = path.split("/")[-1].replace("-0-250-0-375-crop.jpg", "")
         return [
             {
                 "type": "external",
