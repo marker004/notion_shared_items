@@ -5,7 +5,8 @@ from typing_extensions import NotRequired
 from operator import itemgetter
 from urllib import parse
 
-from notion_client import Client as NotionClient
+from notion_client import Client as NotionClient, AsyncClient as AsyncNotionClient
+from notion_client.helpers import collect_paginated_api, async_collect_paginated_api
 
 from shared_items.utils import pp
 
@@ -44,6 +45,7 @@ class Notion:
     def __init__(self):
         self.__token = os.getenv("NOTION_TOKEN")
         self.client = NotionClient(auth=self.__token)
+        self.async_client = AsyncNotionClient(auth=self.__token)
 
     def assemble_prop(self, prop: Prop) -> dict:
         type = prop["type"]

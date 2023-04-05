@@ -33,11 +33,11 @@ def measure_execution(description: Optional[str] = None):
     def wrap(func):
         @functools.wraps(func)
         def wrapped_f(*args, **kwargs):
-            start_time = time.time()
+            start_time = time.monotonic()
             if description:
                 print(description)
             res = func(*args, **kwargs)
-            print(f"Took {time.time() - start_time} seconds\n")
+            print(f"Took {time.monotonic() - start_time} seconds\n")
             return res
 
         return wrapped_f

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shared-items"
-version = "0.0.7"
+version = "0.0.8"
 description = "A module for utilizing commonly used functionality in Notion project"
 authors = ["Mark Reckard <mark.reckard@gmail.com>"]
 
