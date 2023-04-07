@@ -1,3 +1,4 @@
+import asyncio
 import os
 
 from typing import Any, Callable, Literal, Optional, TypedDict, Union, cast
@@ -149,3 +150,19 @@ class Notion:
             )
 
         return create_row
+
+    async def async_delete_block(self, block_id: str) -> asyncio.Future:
+        return await self.async_client.blocks.delete(block_id=block_id)
+
+    async def async_delete_all_blocks(self, block_ids: list[str]):
+        return await asyncio.gather(
+            *[self.async_delete_block(block_id) for block_id in block_ids]
+        )
+
+    async def async_add_page(self, database_id: str, props: dict) -> asyncio.Future:
+        return await self.async_client.pages.create(parent={"database_id": database_id}, properties=props)
+
+    async def async_add_all_pages(self, database_id: str, propses: list[dict]):
+        return await asyncio.gather(
+            *[self.async_add_page(database_id, props) for props in propses]
+        )
