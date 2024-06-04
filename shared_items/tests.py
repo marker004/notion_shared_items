@@ -2,25 +2,38 @@ from shared_items.interfaces.notion import Notion
 from shared_items.utils import pp
 import asyncio
 import time
+
 # from aiohttp import ClientSession
 
-token = 'abc_123'
+token = "abc_123"
 
 notion = Notion(token)
 
 client = notion.client
 async_notion = notion.async_client
 
+
 def get_users():
     return client.users.list()
+
 
 async def aync_get_users() -> asyncio.Future:
     return await async_notion.users.list()
 
+
 async def do_em_all():
     start_time = time.monotonic()
-    x = await asyncio.gather(aync_get_users(), aync_get_users(),aync_get_users(),aync_get_users(),aync_get_users(),aync_get_users(),aync_get_users(),aync_get_users())
-    print('async time: ', time.monotonic() - start_time)
+    x = await asyncio.gather(
+        aync_get_users(),
+        aync_get_users(),
+        aync_get_users(),
+        aync_get_users(),
+        aync_get_users(),
+        aync_get_users(),
+        aync_get_users(),
+        aync_get_users(),
+    )
+    print("async time: ", time.monotonic() - start_time)
     return x
 
 
@@ -31,7 +44,7 @@ users = []
 for i in range(8):
     users.append(get_users())
 
-print('sync time: ', time.monotonic() - start_sync_time)
+print("sync time: ", time.monotonic() - start_sync_time)
 
 # import pdb; pdb.set_trace()
 

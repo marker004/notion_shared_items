@@ -164,7 +164,9 @@ class Notion:
 
     async def async_add_page(self, database_id: str, props: dict) -> asyncio.Future:
         async with AsyncNotionClient(auth=self.__token) as client:
-            return await client.pages.create(parent={"database_id": database_id}, properties=props)
+            return await client.pages.create(
+                parent={"database_id": database_id}, properties=props
+            )
 
     async def async_add_all_pages(self, database_id: str, propses: list[dict]):
         return await asyncio.gather(
@@ -175,9 +177,14 @@ class Notion:
 
     def update_page_properties(self, page_id: str, database_id: str, filter: dict):
         filter = {"property": "Letterboxd ID", "rich_text": {"equals": page_id}}
-        pages = collect_paginated_api(self.client.databases.query, database_id=database_id, filter=filter)[0]['id']
+        pages = collect_paginated_api(
+            self.client.databases.query, database_id=database_id, filter=filter
+        )[0]["id"]
         if not any(pages):
             return
-        page_id = pages[0]['id']
+        page_id = pages[0]["id"]
         # update Page
-        self.client.pages.update(page_id=page_id, properties={'Notes': {"rich_text": [{"text": {'content': 'hi'}}]}})
+        self.client.pages.update(
+            page_id=page_id,
+            properties={"Notes": {"rich_text": [{"text": {"content": "hi"}}]}},
+        )
