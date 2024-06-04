@@ -43,8 +43,10 @@ TYPE_MAP = {"rich_text": "text", "title": "text"}
 
 
 class Notion:
-    def __init__(self):
-        self.__token = os.getenv("NOTION_TOKEN")
+    def __init__(self, token: Optional[str] = None):
+        if not token:
+            raise Exception("Notion token not provided")
+        self.__token = token
         self.client = NotionClient(auth=self.__token)
         self.async_client = AsyncNotionClient(auth=self.__token)
 
@@ -109,11 +111,11 @@ class Notion:
     # note: this only handles text type content for now
     # the dict returned is a Notion Page, too complicated to type for now, given lack of need
     def update_page_props(self, page_id: str, props: dict) -> dict:
-        return self.client.pages.update(page_id=page_id, properties=props)
+        return cast(dict, self.client.pages.update(page_id=page_id, properties=props))
 
     # the dict returned contains a list of Notion Pages, too complicated to type for now, given lack of need
     def query_database(self, database_id: str) -> dict:
-        return self.client.databases.query(database_id=database_id)
+        return cast(dict, self.client.databases.query(database_id=database_id))
 
     def recursive_fetch_and_delete(self, fetcher: Callable[[Optional[str]], dict]):
         def func(next_cursor: Optional[str] = None):
@@ -152,7 +154,8 @@ class Notion:
         return create_row
 
     async def async_delete_block(self, block_id: str) -> asyncio.Future:
-        return await self.async_client.blocks.delete(block_id=block_id)
+        async with AsyncNotionClient(auth=self.__token) as client:
+            return await client.blocks.delete(block_id=block_id)
 
     async def async_delete_all_blocks(self, block_ids: list[str]):
         return await asyncio.gather(
@@ -160,9 +163,21 @@ class Notion:
         )
 
     async def async_add_page(self, database_id: str, props: dict) -> asyncio.Future:
-        return await self.async_client.pages.create(parent={"database_id": database_id}, properties=props)
+        async with AsyncNotionClient(auth=self.__token) as client:
+            return await client.pages.create(parent={"database_id": database_id}, properties=props)
 
     async def async_add_all_pages(self, database_id: str, propses: list[dict]):
         return await asyncio.gather(
             *[self.async_add_page(database_id, props) for props in propses]
         )
+
+    filter = {"property": "Letterboxd ID", "rich_text": {"equals": page_id}}
+
+    def update_page_properties(self, page_id: str, database_id: str, filter: dict):
+        filter = {"property": "Letterboxd ID", "rich_text": {"equals": page_id}}
+        pages = collect_paginated_api(self.client.databases.query, database_id=database_id, filter=filter)[0]['id']
+        if not any(pages):
+            return
+        page_id = pages[0]['id']
+        # update Page
+        self.client.pages.update(page_id=page_id, properties={'Notes': {"rich_text": [{"text": {'content': 'hi'}}]}})

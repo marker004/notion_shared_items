@@ -4,6 +4,7 @@ import string
 import time
 from typing import Optional
 
+TAB = "\t"
 
 class reversor:
     def __init__(self, obj):
@@ -37,9 +38,29 @@ def measure_execution(description: Optional[str] = None):
             if description:
                 print(description)
             res = func(*args, **kwargs)
-            print(f"Took {time.monotonic() - start_time} seconds\n")
+            print(f"{TAB}Took {time.monotonic() - start_time} seconds\n")
             return res
 
         return wrapped_f
 
     return wrap
+
+
+def try_it(func):
+    name = func.__name__
+    @functools.wraps(func)
+    def wrapped_f(*args, **kwargs):
+        try:
+            print(f'STARTING {name}')
+            return func(*args, **kwargs)
+        except Exception:
+            import traceback
+            print()
+            print('----------------------------------------------------')
+            print(f'------------- error in {name} -------------')
+            print('----------------------------------------------------')
+            print()
+            traceback.print_exc()
+
+    return wrapped_f
+
